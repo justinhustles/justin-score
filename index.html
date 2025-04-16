@@ -89,7 +89,16 @@
 
       setTimeout(() => {
         carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
-      }, 500);
+
+        // Auto-select a year to trigger dropdown population
+        setTimeout(() => {
+          const yearSelect = document.getElementById("car-years");
+          if (yearSelect.options.length > 1) {
+            yearSelect.selectedIndex = 1;
+            yearSelect.dispatchEvent(new Event('change'));
+          }
+        }, 500);
+      }, 1000);
 
       document.getElementById("car-model-trims").addEventListener("change", function () {
         const year = document.getElementById("car-years").value;
@@ -141,10 +150,10 @@
       let score = Math.min(rawScore, 10);
 
       let label = "";
-      if (score <= 2.5) label = "Bad";
-      else if (score <= 4.5) label = "Below Average";
-      else if (score <= 6.5) label = "Average";
-      else if (score <= 8.5) label = "Great";
+      if (score < 2.5) label = "Bad";
+      else if (score < 4.5) label = "Below Average";
+      else if (score < 6.5) label = "Average";
+      else if (score < 8.5) label = "Great";
       else if (score < 10) label = "Excellent";
       else label = "Perfect";
 
