@@ -1,61 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Justin Score Calculator</title>
+  <script src="https://www.carqueryapi.com/js/carquery.0.3.4.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 2rem;
-      background: #f0f0f0;
-    }
-    input {
-      padding: 0.6rem;
-      margin: 1rem 0;
-      width: 80%;
-      font-size: 1.2rem;
-    }
-    button {
-      padding: 0.8rem 1.5rem;
-      font-size: 1.2rem;
-      background-color: #007AFF;
-      color: white;
-      border: none;
-      border-radius: 8px;
-    }
-    .result {
-      margin-top: 2rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 2rem; background: #f0f0f0; }
+    select, input { padding: 0.6rem; margin: 0.5rem 0; width: 80%; font-size: 1rem; }
+    button { padding: 0.7rem 1.4rem; font-size: 1.2rem; background: #007AFF; color: white; border: none; border-radius: 6px; }
+    .result { margin-top: 1.5rem; font-size: 1.5rem; font-weight: bold; }
+    .mode-toggle { margin: 1rem 0; }
   </style>
 </head>
 <body>
   <h1>Justin Score</h1>
-  <p>Enter car price and 0–60 mph time:</p>
-  
+  <p>Select a car or enter data manually:</p>
+
+  <select id="car-years"></select>
+  <select id="car-makes"></select>
+  <select id="car-models"></select>
+  <select id="car-model-trims"></select>
+
+  <div class="mode-toggle">
+    <label>
+      <input type="radio" name="mode" value="0to60" checked onchange="updateInputLabel()"> 0–60 mph
+    </label>
+    <label style="margin-left: 1rem;">
+      <input type="radio" name="mode" value="quarter" onchange="updateInputLabel()"> 1/4 mile
+    </label>
+  </div>
+
   <input id="price" type="number" placeholder="Price (USD)" />
   <input id="time" type="number" step="0.01" placeholder="0–60 Time (seconds)" />
-  <br>
   <button onclick="calculateScore()">Calculate</button>
-  
+
   <div class="result" id="result"></div>
 
   <script>
+    const carquery = new CarQuery();
+    carquery.init();
+    carquery.setFilters({ sold_in_us: true });
+    carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
+
+    document.getElementById("car-model-trims").addEventListener("change", function () {
+      const year = document.getElementById("car-years").value;
+      const make = document.getElementById("car-makes").value;
+      const model = document.getElementById("car-models").value;
+
+      fetch(`https://www.carqueryapi.com/api/0.3/?cmd=getTrims&year=${year}&make=${make}&model=${model}&sold_in_us=1`)
+        .then(res => res.json())
+        .then(data => {
+          const selected = document.getElementById("car-model-trims").value;
+          const trimData = data.Trims.find(t => t.model_trim === selected);
+          if (trimData) {
+            document.getElementById("price").value = trimData.model_msrp || '';
+            const mode = getMode();
+            const timeValue = mode === "0to60" ? trimData.model_0_to_60_mph : trimData.model_quarter_mile_time;
+            document.getElementById("time").value = timeValue || '';
+            calculateScore();
+          }
+        });
+    });
+
+    function getMode() {
+      return document.querySelector('input[name="mode"]:checked').value;
+    }
+
+    function updateInputLabel() {
+      const timeInput = document.getElementById("time");
+      if (getMode() === "quarter") {
+        timeInput.placeholder = "1/4 Mile Time (seconds)";
+      } else {
+        timeInput.placeholder = "0–60 Time (seconds)";
+      }
+      timeInput.value = '';
+      calculateScore();
+    }
+
     function calculateScore() {
       const price = parseFloat(document.getElementById('price').value);
       const time = parseFloat(document.getElementById('time').value);
+      const result = document.getElementById('result');
+      const mode = getMode();
 
       if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
-        document.getElementById('result').innerText = "Please enter valid numbers.";
+        result.innerText = "Please enter valid numbers.";
         return;
       }
 
-      const score = 600000 / (price * time);
-      document.getElementById('result').innerText = `Justin Score: ${score.toFixed(2)}`;
+      const base = mode === "quarter" ? 6000000 : 600000;
+      let rawScore = base / (price * time);
+      let score = Math.min(rawScore, 10); // Cap at 10
+
+      let label = "";
+      if (score <= 2) label = "Below Average";
+      else if (score <= 4) label = "Average";
+      else if (score <= 6.5) label = "Good";
+      else if (score < 10) label = "Great";
+      else label = "Perfect";
+
+      result.innerText = `${mode === "quarter" ? "Q-Score" : "Justin Score"}: ${score.toFixed(2)} (${label})`;
     }
   </script>
 </body>
