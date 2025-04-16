@@ -17,6 +17,8 @@
       margin: 0.5rem 0;
       width: 80%;
       font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
     button {
       padding: 0.7rem 1.4rem;
@@ -25,6 +27,7 @@
       color: white;
       border: none;
       border-radius: 6px;
+      margin-top: 1rem;
     }
     .result {
       margin-top: 1.5rem;
@@ -34,22 +37,22 @@
     .mode-toggle {
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
-      margin-top: 1rem;
+      gap: 1rem;
+      margin: 1rem auto;
       flex-wrap: wrap;
     }
     .mode-option {
       background: white;
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1rem;
       border: 2px solid #ccc;
-      border-radius: 20px;
+      border-radius: 25px;
       font-size: 1rem;
       display: flex;
       align-items: center;
       gap: 0.4rem;
     }
     .mode-option input {
-      transform: scale(1.2);
+      transform: scale(1.3);
     }
   </style>
 </head>
@@ -78,11 +81,15 @@
   <div class="result" id="result"></div>
 
   <script>
+    const carquery = new CarQuery();
+
     window.onload = function () {
-      const carquery = new CarQuery();
       carquery.init();
       carquery.setFilters({ sold_in_us: true });
-      carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
+
+      setTimeout(() => {
+        carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
+      }, 500);
 
       document.getElementById("car-model-trims").addEventListener("change", function () {
         const year = document.getElementById("car-years").value;
@@ -111,11 +118,9 @@
 
     function updateInputLabel() {
       const timeInput = document.getElementById("time");
-      if (getMode() === "quarter") {
-        timeInput.placeholder = "1/4 Mile Time (seconds)";
-      } else {
-        timeInput.placeholder = "0–60 Time (seconds)";
-      }
+      timeInput.placeholder = getMode() === "quarter"
+        ? "1/4 Mile Time (seconds)"
+        : "0–60 Time (seconds)";
       timeInput.value = '';
       calculateScore();
     }
@@ -133,7 +138,7 @@
 
       const base = mode === "quarter" ? 6000000 : 600000;
       let rawScore = base / (price * time);
-      let score = Math.min(rawScore, 10); // Cap at 10
+      let score = Math.min(rawScore, 10);
 
       let label = "";
       if (score <= 2.5) label = "Bad";
@@ -143,7 +148,7 @@
       else if (score < 10) label = "Excellent";
       else label = "Perfect";
 
-      result.innerText = `${mode === "quarter" ? "Q-Score" : "Justin Score"}: ${score.toFixed(2)} (${label})`;
+      result.innerText = `Justin Score: ${score.toFixed(2)} (${label})`;
     }
   </script>
 </body>
