@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Justin Score Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    input {
+      padding: 0.6rem;
+      margin: 1rem 0;
+      width: 80%;
+      font-size: 1.2rem;
+    }
+    button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1.2rem;
+      background-color: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    .result {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Justin Score</h1>
+  <p>Enter car price and 0–60 mph time:</p>
+  
+  <input id="price" type="number" placeholder="Price (USD)" />
+  <input id="time" type="number" step="0.01" placeholder="0–60 Time (seconds)" />
+  <br>
+  <button onclick="calculateScore()">Calculate</button>
+  
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculateScore() {
+      const price = parseFloat(document.getElementById('price').value);
+      const time = parseFloat(document.getElementById('time').value);
+
+      if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
+        document.getElementById('result').innerText = "Please enter valid numbers.";
+        return;
+      }
+
+      const score = 600000 / (price * time);
+      document.getElementById('result').innerText = `Justin Score: ${score.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
