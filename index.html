@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Justin Score Calculator</title>
   <style>
@@ -48,12 +48,15 @@
       margin-top: 2rem;
       font-size: 1.5rem;
       font-weight: bold;
-      color: #00e676;
     }
 
-    .unavailable {
-      color: #ff5252;
-    }
+    .bad { color: #ff5252; }
+    .below-average { color: #ff9800; }
+    .average { color: #ffeb3b; }
+    .great { color: #aeea00; }
+    .excellent { color: #00e676; }
+    .perfect { color: #76ff03; }
+    .unavailable { color: #ff5252; }
   </style>
 </head>
 <body>
@@ -86,9 +89,9 @@
     }
 
     function calculateScore() {
-      const price = parseFloat(document.getElementById("price").value);
-      const time = parseFloat(document.getElementById("time").value);
-      const result = document.getElementById("result");
+      const price = parseFloat(document.getElementById('price').value);
+      const time = parseFloat(document.getElementById('time').value);
+      const result = document.getElementById('result');
       const mode = getMode();
 
       if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
@@ -100,15 +103,23 @@
       let rawScore = base / (price * time);
       let score = Math.min(rawScore, 10);
 
-      let label = "";
-      if (score < 2.5) label = "Bad";
-      else if (score < 4.5) label = "Below Average";
-      else if (score < 6.5) label = "Average";
-      else if (score < 8.5) label = "Great";
-      else if (score < 10) label = "Excellent";
-      else label = "Perfect";
+      let label = "", cssClass = "";
 
-      result.innerText = `Justin Score: ${score.toFixed(2)} (${label})`;
+      if (score < 2.5) {
+        label = "Bad"; cssClass = "bad";
+      } else if (score < 4.5) {
+        label = "Below Average"; cssClass = "below-average";
+      } else if (score < 6.5) {
+        label = "Average"; cssClass = "average";
+      } else if (score < 8.5) {
+        label = "Great"; cssClass = "great";
+      } else if (score < 10) {
+        label = "Excellent"; cssClass = "excellent";
+      } else {
+        label = "Perfect"; cssClass = "perfect";
+      }
+
+      result.innerHTML = `<span class="${cssClass}">Justin Score: ${score.toFixed(2)} (${label})</span>`;
     }
   </script>
 </body>
