@@ -6,11 +6,51 @@
   <title>Justin Score Calculator</title>
   <script src="https://www.carqueryapi.com/js/carquery.0.3.4.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2rem; background: #f0f0f0; }
-    select, input { padding: 0.6rem; margin: 0.5rem 0; width: 80%; font-size: 1rem; }
-    button { padding: 0.7rem 1.4rem; font-size: 1.2rem; background: #007AFF; color: white; border: none; border-radius: 6px; }
-    .result { margin-top: 1.5rem; font-size: 1.5rem; font-weight: bold; }
-    .mode-toggle { margin: 1rem 0; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    select, input {
+      padding: 0.6rem;
+      margin: 0.5rem 0;
+      width: 80%;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.7rem 1.4rem;
+      font-size: 1.2rem;
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    .result {
+      margin-top: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .mode-option {
+      background: white;
+      padding: 0.5rem 1rem;
+      border: 2px solid #ccc;
+      border-radius: 20px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .mode-option input {
+      transform: scale(1.2);
+    }
   </style>
 </head>
 <body>
@@ -23,10 +63,10 @@
   <select id="car-model-trims"></select>
 
   <div class="mode-toggle">
-    <label>
+    <label class="mode-option">
       <input type="radio" name="mode" value="0to60" checked onchange="updateInputLabel()"> 0–60 mph
     </label>
-    <label style="margin-left: 1rem;">
+    <label class="mode-option">
       <input type="radio" name="mode" value="quarter" onchange="updateInputLabel()"> 1/4 mile
     </label>
   </div>
@@ -38,30 +78,32 @@
   <div class="result" id="result"></div>
 
   <script>
-    const carquery = new CarQuery();
-    carquery.init();
-    carquery.setFilters({ sold_in_us: true });
-    carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
+    window.onload = function () {
+      const carquery = new CarQuery();
+      carquery.init();
+      carquery.setFilters({ sold_in_us: true });
+      carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
 
-    document.getElementById("car-model-trims").addEventListener("change", function () {
-      const year = document.getElementById("car-years").value;
-      const make = document.getElementById("car-makes").value;
-      const model = document.getElementById("car-models").value;
+      document.getElementById("car-model-trims").addEventListener("change", function () {
+        const year = document.getElementById("car-years").value;
+        const make = document.getElementById("car-makes").value;
+        const model = document.getElementById("car-models").value;
+        const trim = document.getElementById("car-model-trims").value;
 
-      fetch(`https://www.carqueryapi.com/api/0.3/?cmd=getTrims&year=${year}&make=${make}&model=${model}&sold_in_us=1`)
-        .then(res => res.json())
-        .then(data => {
-          const selected = document.getElementById("car-model-trims").value;
-          const trimData = data.Trims.find(t => t.model_trim === selected);
-          if (trimData) {
-            document.getElementById("price").value = trimData.model_msrp || '';
-            const mode = getMode();
-            const timeValue = mode === "0to60" ? trimData.model_0_to_60_mph : trimData.model_quarter_mile_time;
-            document.getElementById("time").value = timeValue || '';
-            calculateScore();
-          }
-        });
-    });
+        fetch(`https://www.carqueryapi.com/api/0.3/?cmd=getTrims&year=${year}&make=${make}&model=${model}&sold_in_us=1`)
+          .then(res => res.json())
+          .then(data => {
+            const selectedTrim = data.Trims.find(t => t.model_trim === trim);
+            if (selectedTrim) {
+              document.getElementById("price").value = selectedTrim.model_msrp || '';
+              const mode = getMode();
+              const timeValue = mode === "0to60" ? selectedTrim.model_0_to_60_mph : selectedTrim.model_quarter_mile_time;
+              document.getElementById("time").value = timeValue || '';
+              calculateScore();
+            }
+          });
+      });
+    };
 
     function getMode() {
       return document.querySelector('input[name="mode"]:checked').value;
@@ -94,10 +136,11 @@
       let score = Math.min(rawScore, 10); // Cap at 10
 
       let label = "";
-      if (score <= 2) label = "Below Average";
-      else if (score <= 4) label = "Average";
-      else if (score <= 6.5) label = "Good";
-      else if (score < 10) label = "Great";
+      if (score <= 2.5) label = "Bad";
+      else if (score <= 4.5) label = "Below Average";
+      else if (score <= 6.5) label = "Average";
+      else if (score <= 8.5) label = "Great";
+      else if (score < 10) label = "Excellent";
       else label = "Perfect";
 
       result.innerText = `${mode === "quarter" ? "Q-Score" : "Justin Score"}: ${score.toFixed(2)} (${label})`;
