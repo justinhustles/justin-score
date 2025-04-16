@@ -99,12 +99,13 @@
         return;
       }
 
-      const base = mode === "quarter" ? 6000000 : 600000;
-      let rawScore = base / (price * time);
+      let benchmarkTime = mode === "quarter" ? 11.5 : 3.0;
+      let referenceProduct = 60000 * benchmarkTime;
+
+      let rawScore = 10 * (referenceProduct / (price * time));
       let score = Math.min(rawScore, 10);
 
       let label = "", cssClass = "";
-
       if (score < 2.5) {
         label = "Bad"; cssClass = "bad";
       } else if (score < 4.5) {
