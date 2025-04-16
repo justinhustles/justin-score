@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Justin Score Calculator</title>
+  <title>Justin Score</title>
+
+  <!-- iOS Web App Settings -->
+  <meta name="apple-mobile-web-app-title" content="Justin Score">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon.png">
+
   <style>
     body {
       background-color: #121212;
@@ -11,6 +18,7 @@
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
+      position: relative;
     }
 
     h1 {
@@ -21,6 +29,50 @@
       font-size: 0.6em;
       color: #888;
       margin-left: 0.3rem;
+    }
+
+    #typewriter {
+      font-family: monospace;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      height: 1.4rem;
+    }
+
+    #info-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      color: #888;
+      font-size: 1.5rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    #info-modal {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 10%;
+      width: 80%;
+      background: #222;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #000;
+      z-index: 1000;
+    }
+
+    #info-modal p {
+      margin-bottom: 1rem;
+    }
+
+    #info-modal button {
+      background: #555;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     select, input {
@@ -60,6 +112,18 @@
   </style>
 </head>
 <body>
+  <button id="info-btn" onclick="toggleInfo()">ℹ️</button>
+  <div id="info-modal">
+    <p><strong>What is the Justin Score?</strong><br>
+    The Justin Score rates how much acceleration performance you're getting for the price. 
+    A score of 5 means the vehicle performs as expected for its price. 
+    A score of 10 means you're getting exceptional performance for what you paid. 
+    It works for both 0–60 mph and 1/4 mile times using a logarithmic price-performance curve.</p>
+    <button onclick="toggleInfo()">Close</button>
+  </div>
+
+  <div id="typewriter"></div>
+
   <h1>Justin Score <span>(beta)</span></h1>
 
   <select id="mode" onchange="updatePlaceholder()">
@@ -75,6 +139,11 @@
   <div class="result" id="result"></div>
 
   <script>
+    function toggleInfo() {
+      const modal = document.getElementById("info-modal");
+      modal.style.display = modal.style.display === "block" ? "none" : "block";
+    }
+
     function getMode() {
       return document.getElementById("mode").value;
     }
@@ -133,6 +202,32 @@
 
       result.innerHTML = `<span class="${cssClass}">Justin Score: ${scoreRounded} (${label})</span>`;
     }
+
+    // Typewriter animation
+    const twElement = document.getElementById("typewriter");
+    const twText = "hello world...";
+    let twIndex = 0;
+    let twDeleting = false;
+
+    function typeLoop() {
+      if (!twDeleting && twIndex <= twText.length) {
+        twElement.innerText = twText.substring(0, twIndex++);
+      } else if (twDeleting && twIndex >= 0) {
+        twElement.innerText = twText.substring(0, twIndex--);
+      }
+
+      if (twIndex > twText.length) {
+        twDeleting = true;
+        setTimeout(typeLoop, 1000);
+      } else if (twIndex < 0) {
+        twDeleting = false;
+        setTimeout(typeLoop, 500);
+      } else {
+        setTimeout(typeLoop, 100);
+      }
+    }
+
+    typeLoop();
   </script>
 </body>
 </html>
