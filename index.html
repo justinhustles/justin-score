@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Justin Score Calculator</title>
-  <script src="https://www.carqueryapi.com/js/carquery.0.3.4.js"></script>
   <style>
     body {
+      background-color: #121212;
+      color: #f0f0f0;
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
-      background: #121212;
-      color: #f0f0f0;
     }
-    label {
-      display: block;
-      text-align: left;
-      margin: 1rem auto 0.2rem;
-      width: 80%;
-      font-size: 0.95rem;
-      color: #ccc;
+
+    h1 {
+      font-size: 2rem;
     }
+
+    h1 span {
+      font-size: 0.6em;
+      color: #888;
+      margin-left: 0.3rem;
+    }
+
     select, input {
-      padding: 0.6rem;
-      margin-bottom: 1rem;
       width: 80%;
+      padding: 0.6rem;
+      margin: 1rem 0;
       font-size: 1rem;
       border-radius: 8px;
       border: 1px solid #444;
       background-color: #1e1e1e;
       color: #fff;
     }
+
     button {
       padding: 0.7rem 1.4rem;
       font-size: 1.2rem;
@@ -40,132 +43,56 @@
       border-radius: 6px;
       margin-top: 1rem;
     }
+
     .result {
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       font-size: 1.5rem;
       font-weight: bold;
       color: #00e676;
     }
-    .mode-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 1rem auto;
-      flex-wrap: wrap;
-    }
-    .mode-option {
-      background: #1e1e1e;
-      padding: 0.6rem 1rem;
-      border: 2px solid #444;
-      border-radius: 25px;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: #fff;
-    }
-    .mode-option input {
-      transform: scale(1.3);
-    }
-    h1 span {
-      font-size: 0.6em;
-      color: #888;
-      margin-left: 0.3rem;
+
+    .unavailable {
+      color: #ff5252;
     }
   </style>
 </head>
 <body>
   <h1>Justin Score <span>(beta)</span></h1>
-  <p>Select a car or enter data manually:</p>
 
-  <label for="car-years">Year</label>
-  <select id="car-years"></select>
+  <select id="mode" onchange="updatePlaceholder()">
+    <option value="0to60" selected>0–60 mph Time</option>
+    <option value="quarter">1/4 Mile Time</option>
+  </select>
 
-  <label for="car-makes">Make</label>
-  <select id="car-makes"></select>
-
-  <label for="car-models">Model</label>
-  <select id="car-models"></select>
-
-  <label for="car-model-trims">Trim</label>
-  <select id="car-model-trims"></select>
-
-  <div class="mode-toggle">
-    <label class="mode-option">
-      <input type="radio" name="mode" value="0to60" checked onchange="updateInputLabel()"> 0–60 mph
-    </label>
-    <label class="mode-option">
-      <input type="radio" name="mode" value="quarter" onchange="updateInputLabel()"> 1/4 mile
-    </label>
-  </div>
-
-  <label for="price">Price (USD)</label>
-  <input id="price" type="number" placeholder="Price (USD)" />
-
-  <label for="time">Acceleration Time (seconds)</label>
+  <input id="price" type="number" placeholder="Vehicle Price (USD)" />
   <input id="time" type="number" step="0.01" placeholder="0–60 Time (seconds)" />
-  
+
   <button onclick="calculateScore()">Calculate</button>
 
   <div class="result" id="result"></div>
 
   <script>
-    const carquery = new CarQuery();
-
-    window.addEventListener("load", function () {
-      carquery.init();
-      carquery.setFilters({ sold_in_us: true });
-      carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
-
-      setTimeout(() => {
-        const yearSelect = document.getElementById("car-years");
-        if (yearSelect.options.length <= 1) {
-          carquery.initYearMakeModelTrim("car-years", "car-makes", "car-models", "car-model-trims");
-        }
-      }, 2000);
-
-      document.getElementById("car-model-trims").addEventListener("change", function () {
-        const year = document.getElementById("car-years").value;
-        const make = document.getElementById("car-makes").value;
-        const model = document.getElementById("car-models").value;
-        const trim = document.getElementById("car-model-trims").value;
-
-        fetch(`https://www.carqueryapi.com/api/0.3/?cmd=getTrims&year=${year}&make=${make}&model=${model}&sold_in_us=1`)
-          .then(res => res.json())
-          .then(data => {
-            const selectedTrim = data.Trims.find(t => t.model_trim === trim);
-            if (selectedTrim) {
-              document.getElementById("price").value = selectedTrim.model_msrp || '';
-              const mode = getMode();
-              const timeValue = mode === "0to60" ? selectedTrim.model_0_to_60_mph : selectedTrim.model_quarter_mile_time;
-              document.getElementById("time").value = timeValue || '';
-              calculateScore();
-            }
-          });
-      });
-    });
-
     function getMode() {
-      return document.querySelector('input[name="mode"]:checked').value;
+      return document.getElementById("mode").value;
     }
 
-    function updateInputLabel() {
+    function updatePlaceholder() {
       const timeInput = document.getElementById("time");
-      timeInput.placeholder = getMode() === "quarter"
+      const mode = getMode();
+      timeInput.placeholder = mode === "quarter"
         ? "1/4 Mile Time (seconds)"
         : "0–60 Time (seconds)";
-      timeInput.value = '';
-      calculateScore();
+      document.getElementById("result").innerText = "";
     }
 
     function calculateScore() {
-      const price = parseFloat(document.getElementById('price').value);
-      const time = parseFloat(document.getElementById('time').value);
-      const result = document.getElementById('result');
+      const price = parseFloat(document.getElementById("price").value);
+      const time = parseFloat(document.getElementById("time").value);
+      const result = document.getElementById("result");
       const mode = getMode();
 
       if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
-        result.innerText = "Please enter valid numbers.";
+        result.innerHTML = `<span class="unavailable">Please enter valid numbers.</span>`;
         return;
       }
 
