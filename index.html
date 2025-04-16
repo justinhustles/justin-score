@@ -88,6 +88,18 @@
       document.getElementById("result").innerText = "";
     }
 
+    function expectedTime(price, mode) {
+      let a, b;
+      if (mode === "quarter") {
+        a = -2.9;
+        b = 23.5;
+      } else {
+        a = -1.6;
+        b = 12.5;
+      }
+      return a * Math.log10(price) + b;
+    }
+
     function calculateScore() {
       const price = parseFloat(document.getElementById('price').value);
       const time = parseFloat(document.getElementById('time').value);
@@ -99,11 +111,10 @@
         return;
       }
 
-      let benchmarkTime = mode === "quarter" ? 11.5 : 3.0;
-      let referenceProduct = 60000 * benchmarkTime;
-
-      let rawScore = 10 * (referenceProduct / (price * time));
-      let score = Math.min(rawScore, 10);
+      const expected = expectedTime(price, mode);
+      let score = 5 * (expected / time);
+      score = Math.min(score, 10);
+      const scoreRounded = score.toFixed(2);
 
       let label = "", cssClass = "";
       if (score < 2.5) {
@@ -120,7 +131,7 @@
         label = "Perfect"; cssClass = "perfect";
       }
 
-      result.innerHTML = `<span class="${cssClass}">Justin Score: ${score.toFixed(2)} (${label})</span>`;
+      result.innerHTML = `<span class="${cssClass}">Justin Score: ${scoreRounded} (${label})</span>`;
     }
   </script>
 </body>
