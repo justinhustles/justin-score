@@ -4,171 +4,175 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Justin Score</title>
-
-  <!-- App Icons -->
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="icon" type="image/png" href="icon.png" />
-
   <style>
     body {
       background-color: #111;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
+      color: #f0f0f0;
+      font-family: 'Courier New', monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px;
+      justify-content: start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      font-size: 18px;
     }
-
     h1 {
-      font-size: 2.5em;
-      font-weight: bold;
-      margin-bottom: 5px;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
     }
-
-    .typewriter {
-      font-family: monospace;
+    .beta {
+      color: #999;
       font-size: 1rem;
+    }
+    .typewriter {
+      font-family: 'Courier New', monospace;
       color: #ccc;
-      height: 20px;
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: 2px solid #fff;
-      width: 12ch;
-      animation: typing 2s steps(12), blink 0.7s infinite step-end alternate, erase 2s steps(12) 4s forwards, loop 6s linear infinite;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      height: 1.5rem;
     }
-
-    @keyframes typing { from { width: 0 } to { width: 12ch } }
-    @keyframes erase { from { width: 12ch } to { width: 0 } }
-    @keyframes blink { 50% { border-color: transparent; } }
-
-    .info-btn {
+    .info-button {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 1.3em;
-      cursor: pointer;
-      background: none;
+      top: 1rem;
+      right: 1rem;
+      background: #5a90c9;
+      color: white;
+      border-radius: 50%;
+      padding: 0.3rem 0.6rem;
+      font-weight: bold;
       border: none;
-      color: #9cf;
+      font-size: 1rem;
     }
-
     .popup {
-      display: none;
       position: fixed;
       top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background: #222;
-      padding: 20px;
-      border: 1px solid #555;
-      border-radius: 10px;
-      max-width: 90%;
-      color: #eee;
-      z-index: 10;
-    }
-
-    .popup button {
-      margin-top: 10px;
-      padding: 5px 15px;
-      background: #444;
       color: #fff;
+      padding: 1.5rem;
+      border: 1px solid #888;
+      border-radius: 10px;
+      z-index: 10;
+      display: none;
+    }
+    .popup button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #333;
+      color: white;
       border: none;
       border-radius: 5px;
     }
-
-    select, input {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
+    select, input, button {
+      font-size: 16px;
+      padding: 12px;
+      margin: 0.5rem 0;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 8px;
       border: none;
-      width: 250px;
-      background: #222;
-      color: #fff;
+      background-color: #222;
+      color: white;
     }
-
-    .score-output {
-      font-size: 1.5em;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-
-    .calculate-btn {
-      background: #007bff;
-      color: #fff;
-      padding: 10px 30px;
-      border: none;
-      border-radius: 6px;
-      font-size: 1em;
+    button {
+      background-color: #007bff;
+      color: white;
       cursor: pointer;
     }
-
-    .calculate-btn:hover {
-      background: #0056b3;
+    #result {
+      margin-top: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="typewriter">hello world...</div>
-
-  <button class="info-btn" onclick="document.getElementById('popup').style.display='block'">ℹ️</button>
-
-  <div id="popup" class="popup">
-    <p><strong>Justin Score</strong> is a performance-per-dollar calculator for vehicles. Enter a car’s price and 0–60 mph or 1/4 mile time. A higher score means better performance value.</p>
-    <button onclick="document.getElementById('popup').style.display='none'">Close</button>
-  </div>
-
-  <h1>Justin Score <span style="font-size: 0.6em; color: gray;">(beta)</span></h1>
+  <div class="typewriter" id="typewriter"></div>
+  <button class="info-button" onclick="togglePopup()">i</button>
+  <h1>Justin Score <span class="beta">(beta)</span></h1>
 
   <select id="mode">
     <option value="0-60">0–60 mph Time</option>
-    <option value="1/4">1/4 mile Time</option>
+    <option value="1/4-mile">1/4 mile Time</option>
   </select>
 
-  <input type="number" id="price" placeholder="Vehicle Price (USD)" />
-  <input type="number" id="time" placeholder="Time (seconds)" />
+  <input type="number" id="price" placeholder="Vehicle Price (USD)">
+  <input type="number" id="time" placeholder="Time (seconds)">
+  <button onclick="calculate()">Calculate</button>
 
-  <button class="calculate-btn" onclick="calculateScore()">Calculate</button>
+  <div id="result"></div>
 
-  <div id="score" class="score-output"></div>
+  <div class="popup" id="popup">
+    <p>The Justin Score is a performance-per-dollar rating. A perfect 10 means exceptional acceleration for the price. Toggle between 0–60 and 1/4 mile times.</p>
+    <button onclick="togglePopup()">Close</button>
+  </div>
 
   <script>
-    function calculateScore() {
+    const messages = ["hello world..."];
+    let i = 0, j = 0, current = "", isDeleting = false;
+
+    function type() {
+      const target = document.getElementById("typewriter");
+      if (!isDeleting && j <= messages[i].length) {
+        current = messages[i].substring(0, j++);
+        target.innerHTML = current;
+      } else if (isDeleting && j >= 0) {
+        current = messages[i].substring(0, j--);
+        target.innerHTML = current;
+      }
+
+      if (j === messages[i].length + 1) isDeleting = true;
+      if (j === 0 && isDeleting) {
+        isDeleting = false;
+        i = (i + 1) % messages.length;
+      }
+      setTimeout(type, isDeleting ? 80 : 100);
+    }
+    type();
+
+    function togglePopup() {
+      const popup = document.getElementById("popup");
+      popup.style.display = popup.style.display === "block" ? "none" : "block";
+    }
+
+    function calculate() {
       const price = parseFloat(document.getElementById("price").value);
       const time = parseFloat(document.getElementById("time").value);
       const mode = document.getElementById("mode").value;
-      const display = document.getElementById("score");
+      const resultEl = document.getElementById("result");
 
-      if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
-        display.innerHTML = "Please enter valid values.";
-        display.style.color = "white";
+      if (!price || !time) {
+        resultEl.textContent = "Please enter valid price and time.";
+        resultEl.style.color = "red";
         return;
       }
 
-      // Score = inverse of (price * time), scaled
-      const raw = price * time;
-      let score = 1000000 / raw;
+      const value = price * time;
+      let score;
+      if (mode === "0-60") {
+        score = 312000 / value;
+      } else {
+        score = 780000 / value;
+      }
 
-      // Cap score at 10
-      score = Math.min(10, score);
+      score = Math.max(0, Math.min(10, score));
       const rounded = score.toFixed(2);
-
-      // Color by rating
-      let color = "white";
-      if (score < 2.5) color = "red";
-      else if (score < 4.5) color = "orange";
-      else if (score < 6.5) color = "gold";
-      else if (score < 8.5) color = "lightgreen";
-      else color = "lime";
-
       let label = "";
-      if (score < 2.5) label = "Bad";
-      else if (score < 4.5) label = "Below Average";
-      else if (score < 6.5) label = "Average";
-      else if (score < 8.5) label = "Great";
-      else if (score < 10) label = "Excellent";
-      else label = "Perfect";
+      let color = "white";
 
-      display.style.color = color;
-      display.innerHTML = `Justin Score: ${rounded} (${label})`;
+      if (score < 2.5) { label = "Bad"; color = "red"; }
+      else if (score < 4.5) { label = "Below Average"; color = "orange"; }
+      else if (score < 6.5) { label = "Average"; color = "gold"; }
+      else if (score < 8.5) { label = "Great"; color = "lime"; }
+      else if (score < 10) { label = "Excellent"; color = "green"; }
+      else { label = "Perfect"; color = "#00ffcc"; }
+
+      resultEl.textContent = `Justin Score: ${rounded} (${label})`;
+      resultEl.style.color = color;
     }
   </script>
 </body>
