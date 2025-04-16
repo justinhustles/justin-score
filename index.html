@@ -2,232 +2,174 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Justin Score</title>
 
-  <!-- iOS Web App Settings -->
-  <meta name="apple-mobile-web-app-title" content="Justin Score">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icon.png">
+  <!-- App Icons -->
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
 
   <style>
     body {
-      background-color: #121212;
-      color: #f0f0f0;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
+      background-color: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    h1 span {
-      font-size: 0.6em;
-      color: #888;
-      margin-left: 0.3rem;
-    }
-
-    #typewriter {
+    .typewriter {
       font-family: monospace;
       font-size: 1rem;
-      margin-bottom: 1rem;
-      height: 1.4rem;
+      color: #ccc;
+      height: 20px;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid #fff;
+      width: 12ch;
+      animation: typing 2s steps(12), blink 0.7s infinite step-end alternate, erase 2s steps(12) 4s forwards, loop 6s linear infinite;
     }
 
-    #info-btn {
+    @keyframes typing { from { width: 0 } to { width: 12ch } }
+    @keyframes erase { from { width: 12ch } to { width: 0 } }
+    @keyframes blink { 50% { border-color: transparent; } }
+
+    .info-btn {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      color: #888;
-      font-size: 1.5rem;
-      border: none;
+      top: 15px;
+      right: 15px;
+      font-size: 1.3em;
       cursor: pointer;
+      background: none;
+      border: none;
+      color: #9cf;
     }
 
-    #info-modal {
+    .popup {
       display: none;
       position: fixed;
       top: 20%;
-      left: 10%;
-      width: 80%;
       background: #222;
-      padding: 1.5rem;
+      padding: 20px;
+      border: 1px solid #555;
       border-radius: 10px;
-      box-shadow: 0 0 20px #000;
-      z-index: 1000;
+      max-width: 90%;
+      color: #eee;
+      z-index: 10;
     }
 
-    #info-modal p {
-      margin-bottom: 1rem;
-    }
-
-    #info-modal button {
-      background: #555;
+    .popup button {
+      margin-top: 10px;
+      padding: 5px 15px;
+      background: #444;
       color: #fff;
       border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 5px;
     }
 
     select, input {
-      width: 80%;
-      padding: 0.6rem;
-      margin: 1rem 0;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background-color: #1e1e1e;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      width: 250px;
+      background: #222;
       color: #fff;
     }
 
-    button {
-      padding: 0.7rem 1.4rem;
-      font-size: 1.2rem;
-      background: #00c853;
-      color: white;
+    .score-output {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .calculate-btn {
+      background: #007bff;
+      color: #fff;
+      padding: 10px 30px;
       border: none;
       border-radius: 6px;
-      margin-top: 1rem;
+      font-size: 1em;
+      cursor: pointer;
     }
 
-    .result {
-      margin-top: 2rem;
-      font-size: 1.5rem;
-      font-weight: bold;
+    .calculate-btn:hover {
+      background: #0056b3;
     }
-
-    .bad { color: #ff5252; }
-    .below-average { color: #ff9800; }
-    .average { color: #ffeb3b; }
-    .great { color: #aeea00; }
-    .excellent { color: #00e676; }
-    .perfect { color: #76ff03; }
-    .unavailable { color: #ff5252; }
   </style>
 </head>
 <body>
-  <button id="info-btn" onclick="toggleInfo()">ℹ️</button>
-  <div id="info-modal">
-    <p><strong>What is the Justin Score?</strong><br>
-    The Justin Score rates how much acceleration performance you're getting for the price. 
-    A score of 5 means the vehicle performs as expected for its price. 
-    A score of 10 means you're getting exceptional performance for what you paid. 
-    It works for both 0–60 mph and 1/4 mile times using a logarithmic price-performance curve.</p>
-    <button onclick="toggleInfo()">Close</button>
+  <div class="typewriter">hello world...</div>
+
+  <button class="info-btn" onclick="document.getElementById('popup').style.display='block'">ℹ️</button>
+
+  <div id="popup" class="popup">
+    <p><strong>Justin Score</strong> is a performance-per-dollar calculator for vehicles. Enter a car’s price and 0–60 mph or 1/4 mile time. A higher score means better performance value.</p>
+    <button onclick="document.getElementById('popup').style.display='none'">Close</button>
   </div>
 
-  <div id="typewriter"></div>
+  <h1>Justin Score <span style="font-size: 0.6em; color: gray;">(beta)</span></h1>
 
-  <h1>Justin Score <span>(beta)</span></h1>
-
-  <select id="mode" onchange="updatePlaceholder()">
-    <option value="0to60" selected>0–60 mph Time</option>
-    <option value="quarter">1/4 Mile Time</option>
+  <select id="mode">
+    <option value="0-60">0–60 mph Time</option>
+    <option value="1/4">1/4 mile Time</option>
   </select>
 
-  <input id="price" type="number" placeholder="Vehicle Price (USD)" />
-  <input id="time" type="number" step="0.01" placeholder="0–60 Time (seconds)" />
+  <input type="number" id="price" placeholder="Vehicle Price (USD)" />
+  <input type="number" id="time" placeholder="Time (seconds)" />
 
-  <button onclick="calculateScore()">Calculate</button>
+  <button class="calculate-btn" onclick="calculateScore()">Calculate</button>
 
-  <div class="result" id="result"></div>
+  <div id="score" class="score-output"></div>
 
   <script>
-    function toggleInfo() {
-      const modal = document.getElementById("info-modal");
-      modal.style.display = modal.style.display === "block" ? "none" : "block";
-    }
-
-    function getMode() {
-      return document.getElementById("mode").value;
-    }
-
-    function updatePlaceholder() {
-      const timeInput = document.getElementById("time");
-      const mode = getMode();
-      timeInput.placeholder = mode === "quarter"
-        ? "1/4 Mile Time (seconds)"
-        : "0–60 Time (seconds)";
-      document.getElementById("result").innerText = "";
-    }
-
-    function expectedTime(price, mode) {
-      let a, b;
-      if (mode === "quarter") {
-        a = -2.9;
-        b = 23.5;
-      } else {
-        a = -1.6;
-        b = 12.5;
-      }
-      return a * Math.log10(price) + b;
-    }
-
     function calculateScore() {
-      const price = parseFloat(document.getElementById('price').value);
-      const time = parseFloat(document.getElementById('time').value);
-      const result = document.getElementById('result');
-      const mode = getMode();
+      const price = parseFloat(document.getElementById("price").value);
+      const time = parseFloat(document.getElementById("time").value);
+      const mode = document.getElementById("mode").value;
+      const display = document.getElementById("score");
 
       if (isNaN(price) || isNaN(time) || price <= 0 || time <= 0) {
-        result.innerHTML = `<span class="unavailable">Please enter valid numbers.</span>`;
+        display.innerHTML = "Please enter valid values.";
+        display.style.color = "white";
         return;
       }
 
-      const expected = expectedTime(price, mode);
-      let score = 5 * (expected / time);
-      score = Math.min(score, 10);
-      const scoreRounded = score.toFixed(2);
+      // Score = inverse of (price * time), scaled
+      const raw = price * time;
+      let score = 1000000 / raw;
 
-      let label = "", cssClass = "";
-      if (score < 2.5) {
-        label = "Bad"; cssClass = "bad";
-      } else if (score < 4.5) {
-        label = "Below Average"; cssClass = "below-average";
-      } else if (score < 6.5) {
-        label = "Average"; cssClass = "average";
-      } else if (score < 8.5) {
-        label = "Great"; cssClass = "great";
-      } else if (score < 10) {
-        label = "Excellent"; cssClass = "excellent";
-      } else {
-        label = "Perfect"; cssClass = "perfect";
-      }
+      // Cap score at 10
+      score = Math.min(10, score);
+      const rounded = score.toFixed(2);
 
-      result.innerHTML = `<span class="${cssClass}">Justin Score: ${scoreRounded} (${label})</span>`;
+      // Color by rating
+      let color = "white";
+      if (score < 2.5) color = "red";
+      else if (score < 4.5) color = "orange";
+      else if (score < 6.5) color = "gold";
+      else if (score < 8.5) color = "lightgreen";
+      else color = "lime";
+
+      let label = "";
+      if (score < 2.5) label = "Bad";
+      else if (score < 4.5) label = "Below Average";
+      else if (score < 6.5) label = "Average";
+      else if (score < 8.5) label = "Great";
+      else if (score < 10) label = "Excellent";
+      else label = "Perfect";
+
+      display.style.color = color;
+      display.innerHTML = `Justin Score: ${rounded} (${label})`;
     }
-
-    // Typewriter animation
-    const twElement = document.getElementById("typewriter");
-    const twText = "hello world...";
-    let twIndex = 0;
-    let twDeleting = false;
-
-    function typeLoop() {
-      if (!twDeleting && twIndex <= twText.length) {
-        twElement.innerText = twText.substring(0, twIndex++);
-      } else if (twDeleting && twIndex >= 0) {
-        twElement.innerText = twText.substring(0, twIndex--);
-      }
-
-      if (twIndex > twText.length) {
-        twDeleting = true;
-        setTimeout(typeLoop, 1000);
-      } else if (twIndex < 0) {
-        twDeleting = false;
-        setTimeout(typeLoop, 500);
-      } else {
-        setTimeout(typeLoop, 100);
-      }
-    }
-
-    typeLoop();
   </script>
 </body>
 </html>
